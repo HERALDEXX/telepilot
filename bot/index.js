@@ -35,3 +35,9 @@ bot.on("text", (ctx) => ctx.reply(`📩 Received: ${ctx.message.text}`));
 
 bot.launch();
 console.log("🟢 Telepilot running...");
+
+const express = require("express");
+const app = express();
+
+app.get("/", (req, res) => res.send("Telepilot running"));
+app.listen(process.env.PORT || 3000);
