@@ -1,0 +1,11 @@
+{
+  "watch": ["."],
+  "ignore": [
+    "node_modules/**",
+    "LICENSE",
+    "README.md",
+    ".env.example",
+    ".gitignore"
+  ],
+  "ext": "js,json,env"
+}

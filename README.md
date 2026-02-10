@@ -70,7 +70,13 @@ BOT_TOKEN=your_telegram_bot_token
 ### 4. Run the bot
 
 ```bash
-node bot/index.js
+npm run dev
+```
+
+Use `npm run dev` to auto-restart on file changes during development. For a one-off run without watching, use:
+
+```bash
+npm start
 ```
 
 ---

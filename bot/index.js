@@ -34,4 +34,4 @@ bot.command("about", (ctx) =>
 bot.on("text", (ctx) => ctx.reply(`📩 Received: ${ctx.message.text}`));
 
 bot.launch();
-console.log("Telepilot running...");
+console.log("🟢 Telepilot running...");
