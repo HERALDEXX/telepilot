@@ -35,7 +35,10 @@ bot.help((ctx) =>
       `/help - list commands\n` +
       `/status - check bot availability\n` +
       `/about - bot info\n` +
-      `/quote - get a random quote`,
+      `/quote - get a random quote\n\n` +
+      `Admin only\n` +
+      `/broadcast <message> - send a broadcast\n` +
+      `/stats - user count`,
   ),
 );
 
@@ -88,6 +91,22 @@ bot.command("broadcast", async (ctx) => {
   }
 
   ctx.reply(`📢 Broadcast sent to ${success} users.`);
+});
+
+bot.command("stats", async (ctx) => {
+  if (!isAdmin(ctx)) {
+    return ctx.reply("⛔ Not authorized.");
+  }
+
+  const { count, error } = await supabase
+    .from("users")
+    .select("*", { count: "exact", head: true });
+
+  if (error) {
+    return ctx.reply("❌ Failed to fetch stats.");
+  }
+
+  ctx.reply(`📊 Total users: ${count}`);
 });
 
 bot.on("text", (ctx) => ctx.reply(`📩 Received: ${ctx.message.text}`));

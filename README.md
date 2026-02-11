@@ -1,21 +1,39 @@
 # Telepilot
 
-A modular Telegram bot built with Node.js and Telegraf.
+A Telegram bot built with Node.js, Telegraf, and Supabase, plus a tiny Express health endpoint.
 
 ---
 
 ## Overview
 
-**Telepilot** is designed to be a scalable automation and AI‑powered Telegram assistant.  
-The architecture separates bot logic, services, and configuration for easy expansion as the project grows.
+Telepilot is a modular automation bot for Telegram. The codebase keeps bot logic, services, and configuration separated so new commands and integrations are easy to add.
 
 ---
 
 ## Current Features
 
-- Basic Telegram bot initialization
-- Environment-based configuration
-- Modular folder structure
+- Telegram bot commands with Telegraf
+- User persistence to Supabase on `/start`
+- Admin-only broadcast messaging
+- Random quote command backed by an external API
+- Express HTTP endpoint for basic uptime checks
+
+---
+
+## Commands
+
+User commands:
+
+- `/start` - register user and welcome
+- `/help` - list commands
+- `/status` - bot availability
+- `/about` - bot info
+- `/quote` - fetch a random quote
+
+Admin commands:
+
+- `/broadcast <message>` - send a broadcast
+- `/stats` - user count
 
 ---
 
@@ -23,8 +41,9 @@ The architecture separates bot logic, services, and configuration for easy expan
 
 - Node.js
 - Telegraf
+- Supabase JS
+- Express
 - dotenv
-- (Planned) Express API layer
 
 ---
 
@@ -34,10 +53,12 @@ The architecture separates bot logic, services, and configuration for easy expan
 telepilot/
 ├── bot/
 │   └── index.js
-├── api/
+├── api/                # currently empty
 ├── services/
+│   └── quoteService.js
 ├── config/
-│   └── env.js
+│   ├── env.js
+│   └── supabase.js
 ├── .env
 ├── nodemon.json
 ├── package.json
@@ -66,25 +87,37 @@ Create a `.env` file in the project root containing:
 
 ```env
 BOT_TOKEN=your_telegram_bot_token
+SUPABASE_URL=your_supabase_url
+SUPABASE_ANON_KEY=your_supabase_anon_key
+ADMIN_ID=your_telegram_user_id
+PORT=3000
 ```
 
-### 4. Run the bot
+### 4. Prepare Supabase
+
+The bot writes to a `users` table on `/start` with columns:
+
+- `id` (number)
+- `username` (text, nullable)
+- `first_name` (text, nullable)
+
+---
+
+## Run
+
+Development (auto-reload):
 
 ```bash
 npm run dev
 ```
 
-Use `npm run dev` to auto-restart on file changes during development. For a one-off run without watching, use:
+One-off run:
 
 ```bash
 npm start
 ```
 
----
-
-## Development Goal
-
-Build a production‑ready Telegram automation and AI assistant platform with extensible modules and service integrations.
+The Express health endpoint responds on `GET /` with `Telepilot running`.
 
 ---
 
