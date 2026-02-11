@@ -9,14 +9,22 @@ const { getRandomQuote } = require("../services/quoteService");
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
 bot.start(async (ctx) => {
-  const userId = ctx.from.id;
+  const user = ctx.from;
 
-  await supabase.from("users").upsert({ id: userId });
+  const { error } = await supabase
+    .from("users")
+    .upsert({
+      id: user.id,
+      username: user.username || null,
+      first_name: user.first_name || null,
+    });
+
+  if (error) console.log(error);
 
   ctx.reply(
     `👋 Welcome to Telepilot\n\n` +
-      `⚙️ If I don't reply, I may be offline or under maintenance.\n\n` +
-      `Type /help to see available commands`,
+    `⚙️ If I don't reply, I may be offline or under maintenance.\n\n` +
+    `Type /help to see available commands`
   );
 });
 
