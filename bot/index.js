@@ -69,8 +69,25 @@ bot.command("broadcast", async (ctx) => {
     return ctx.reply("Usage: /broadcast your message here");
   }
 
-  // For now, just confirm
-  ctx.reply(`📢 Broadcast sent:\n\n${message}`);
+  const { data: users, error } = await supabase.from("users").select("id");
+
+  if (error) {
+    console.log(error);
+    return ctx.reply("❌ Failed to fetch users.");
+  }
+
+  let success = 0;
+
+  for (const user of users) {
+    try {
+      await ctx.telegram.sendMessage(user.id, message);
+      success++;
+    } catch (err) {
+      console.log("Failed to send to:", user.id);
+    }
+  }
+
+  ctx.reply(`📢 Broadcast sent to ${success} users.`);
 });
 
 bot.on("text", (ctx) => ctx.reply(`📩 Received: ${ctx.message.text}`));
