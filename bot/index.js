@@ -125,10 +125,10 @@ bot.command("active", async (ctx) => {
   if (!isAdmin(ctx)) return ctx.reply("⛔ Not authorized.");
 
   const now = new Date();
-  const oneDayAgo = new Date(now - 24 * 60 * 60 * 1000);
-  const sevenDaysAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
-  const thirtyDaysAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
-
+  const oneDayAgo = new Date(now - 24 * 60 * 60 * 1000).toISOString();
+  const sevenDaysAgo = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const thirtyDaysAgo = new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString();
+  
   const { count: active24h } = await supabase
     .from("users")
     .select("*", { count: "exact", head: true })
