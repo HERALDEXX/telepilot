@@ -12,8 +12,10 @@ bot.use(async (ctx, next) => {
   if (ctx.from) {
     await supabase
       .from("users")
-      .update({ last_active: new Date() })
-      .eq("id", ctx.from.id);
+      .upsert({ 
+        id: ctx.from.id,
+        last_active: new Date(), 
+      });
   }
 
   return next();
@@ -22,13 +24,11 @@ bot.use(async (ctx, next) => {
 bot.start(async (ctx) => {
   const user = ctx.from;
 
-  const { error } = await supabase
-    .from("users")
-    .upsert({
-      id: user.id,
-      username: user.username || null,
-      first_name: user.first_name || null,
-    });
+  const { error } = await supabase.from("users").upsert({
+    id: user.id,
+    username: user.username || null,
+    first_name: user.first_name || null,
+  });
 
   if (error) console.log(error);
 
@@ -49,7 +49,8 @@ bot.help((ctx) =>
       `/quote - get a random quote\n\n` +
       `Admin only\n` +
       `/broadcast <message> - send a broadcast\n` +
-      `/stats - user count`,
+      `/stats - user count\n` +
+      `/active - active users analytics`,
   ),
 );
 
@@ -118,6 +119,37 @@ bot.command("stats", async (ctx) => {
   }
 
   ctx.reply(`📊 Total users: ${count}`);
+});
+
+bot.command("active", async (ctx) => {
+  if (!isAdmin(ctx)) return ctx.reply("⛔ Not authorized.");
+
+  const now = new Date();
+  const oneDayAgo = new Date(now - 24 * 60 * 60 * 1000);
+  const sevenDaysAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+  const thirtyDaysAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
+
+  const { count: active24h } = await supabase
+    .from("users")
+    .select("*", { count: "exact", head: true })
+    .gte("last_active", oneDayAgo);
+
+  const { count: active7d } = await supabase
+    .from("users")
+    .select("*", { count: "exact", head: true })
+    .gte("last_active", sevenDaysAgo);
+
+  const { count: active30d } = await supabase
+    .from("users")
+    .select("*", { count: "exact", head: true })
+    .gte("last_active", thirtyDaysAgo);
+
+  ctx.reply(
+    `📈 Activity Stats\n\n` +
+      `🟢 Active (24h): ${active24h ?? 0}\n` +
+      `🟡 Active (7d): ${active7d ?? 0}\n` +
+      `🔵 Active (30d): ${active30d ?? 0}`,
+  );
 });
 
 bot.on("text", (ctx) => {
