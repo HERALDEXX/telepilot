@@ -109,7 +109,14 @@ bot.command("stats", async (ctx) => {
   ctx.reply(`📊 Total users: ${count}`);
 });
 
-bot.on("text", (ctx) => ctx.reply(`📩 Received: ${ctx.message.text}`));
+bot.on("text", async (ctx) => {
+  await supabase
+    .from("users")
+    .update({ last_active: new Date() })
+    .eq("id", ctx.from.id);
+
+  ctx.reply(`📩 Received: ${ctx.message.text}`);
+});
 
 bot.launch({ dropPendingUpdates: true });
 console.log("🟢 Telepilot running...");
