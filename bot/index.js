@@ -1,5 +1,6 @@
 require("dotenv").config();
 const { Telegraf } = require("telegraf");
+const supabase = require("../config/supabase");
 const isAdmin = (ctx) => {
   return String(ctx.from.id) === process.env.ADMIN_ID;
 };
@@ -7,13 +8,17 @@ const { getRandomQuote } = require("../services/quoteService");
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
-bot.start((ctx) =>
+bot.start(async (ctx) => {
+  const userId = ctx.from.id;
+
+  await supabase.from("users").upsert({ id: userId });
+
   ctx.reply(
     `👋 Welcome to Telepilot\n\n` +
       `⚙️ If I don't reply, I may be offline or under maintenance.\n\n` +
       `Type /help to see available commands`,
-  ),
-);
+  );
+});
 
 bot.help((ctx) =>
   ctx.reply(
@@ -62,7 +67,7 @@ bot.command("broadcast", async (ctx) => {
 
 bot.on("text", (ctx) => ctx.reply(`📩 Received: ${ctx.message.text}`));
 
-bot.launch();
+bot.launch({ dropPendingUpdates: true });
 console.log("🟢 Telepilot running...");
 
 const express = require("express");
