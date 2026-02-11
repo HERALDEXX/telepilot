@@ -8,6 +8,17 @@ const { getRandomQuote } = require("../services/quoteService");
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
+bot.use(async (ctx, next) => {
+  if (ctx.from) {
+    await supabase
+      .from("users")
+      .update({ last_active: new Date() })
+      .eq("id", ctx.from.id);
+  }
+
+  return next();
+});
+
 bot.start(async (ctx) => {
   const user = ctx.from;
 
@@ -109,12 +120,7 @@ bot.command("stats", async (ctx) => {
   ctx.reply(`📊 Total users: ${count}`);
 });
 
-bot.on("text", async (ctx) => {
-  await supabase
-    .from("users")
-    .update({ last_active: new Date() })
-    .eq("id", ctx.from.id);
-
+bot.on("text", (ctx) => {
   ctx.reply(`📩 Received: ${ctx.message.text}`);
 });
 
