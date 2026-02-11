@@ -39,6 +39,7 @@ telepilot/
 ├── config/
 │   └── env.js
 ├── .env
+├── nodemon.json
 ├── package.json
 ```
 

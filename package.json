@@ -1,7 +1,7 @@
 {
   "name": "telepilot",
   "version": "1.0.0",
-  "description": "AI‑powered Telegram bot and web dashboard for community automation, moderation, and analytics.",
+  "description": "AI-powered Telegram bot and web dashboard for community automation, moderation, and analytics.",
   "main": "index.js",
   "scripts": {
     "start": "node bot/index.js",
@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/HERALDEXX/telepilot#readme",
   "dependencies": {
+    "axios": "^1.13.5",
     "dotenv": "^17.2.4",
     "express": "^5.2.1",
     "telegraf": "^4.16.3"

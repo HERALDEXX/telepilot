@@ -1,5 +1,6 @@
 require("dotenv").config();
 const { Telegraf } = require("telegraf");
+const { getRandomQuote } = require("../services/quoteService");
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
@@ -17,7 +18,8 @@ bot.help((ctx) =>
       `/start - start the bot\n` +
       `/help - list commands\n` +
       `/status - check bot availability\n` +
-      `/about - bot info`,
+      `/about - bot info\n` +
+      `/quote - get a random quote`,
   ),
 );
 
@@ -30,6 +32,15 @@ bot.command("about", (ctx) =>
       `More features coming soon.`,
   ),
 );
+
+bot.command("quote", async (ctx) => {
+  try {
+    const quote = await getRandomQuote();
+    await ctx.reply(`💬 "${quote.q}"\n\n— ${quote.a}`);
+  } catch (err) {
+    await ctx.reply("⚠️ Could not fetch quote. Try again later.");
+  }
+});
 
 bot.on("text", (ctx) => ctx.reply(`📩 Received: ${ctx.message.text}`));
 
