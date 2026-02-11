@@ -1,5 +1,8 @@
 require("dotenv").config();
 const { Telegraf } = require("telegraf");
+const isAdmin = (ctx) => {
+  return String(ctx.from.id) === process.env.ADMIN_ID;
+};
 const { getRandomQuote } = require("../services/quoteService");
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
@@ -40,6 +43,21 @@ bot.command("quote", async (ctx) => {
   } catch (err) {
     await ctx.reply("⚠️ Could not fetch quote. Try again later.");
   }
+});
+
+bot.command("broadcast", async (ctx) => {
+  if (!isAdmin(ctx)) {
+    return ctx.reply("⛔ You are not authorized to use this command.");
+  }
+
+  const message = ctx.message.text.replace("/broadcast", "").trim();
+
+  if (!message) {
+    return ctx.reply("Usage: /broadcast your message here");
+  }
+
+  // For now, just confirm
+  ctx.reply(`📢 Broadcast sent:\n\n${message}`);
 });
 
 bot.on("text", (ctx) => ctx.reply(`📩 Received: ${ctx.message.text}`));
