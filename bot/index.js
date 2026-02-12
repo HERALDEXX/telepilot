@@ -8,6 +8,16 @@ const { getRandomQuote } = require("../services/quoteService");
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
+const rateLimit = require("telegraf-ratelimit");
+
+const limitConfig = {
+  window: 3000,
+  limit: 3,
+  onLimitExceeded: (ctx) => ctx.reply("⚠️ Slow down."),
+};
+
+bot.use(rateLimit(limitConfig));
+
 bot.use(async (ctx, next) => {
   if (ctx.from) {
     await supabase
