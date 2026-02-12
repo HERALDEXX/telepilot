@@ -33,6 +33,14 @@ bot.use(async (ctx, next) => {
 bot.start(async (ctx) => {
   const user = ctx.from;
 
+  const { data: existingUser } = await supabase
+    .from("users")
+    .select("id")
+    .eq("id", user.id)
+    .single();
+
+  const isNewUser = !existingUser;
+
   const { error } = await supabase.from("users").upsert({
     id: user.id,
     username: user.username || null,
@@ -40,6 +48,14 @@ bot.start(async (ctx) => {
   });
 
   if (error) console.log(error);
+
+  if (isNewUser) {
+    await supabase.from("logs").insert({
+      type: "new_user",
+      user_id: user.id,
+      message: `New user joined: ${user.username || user.first_name}`,
+    });
+  }
 
   ctx.reply(
     `👋 Hey! Welcome to Telepilot.\n\n` +
