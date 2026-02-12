@@ -13,19 +13,18 @@ const rateLimit = require("telegraf-ratelimit");
 const limitConfig = {
   window: 3000,
   limit: 3,
-  onLimitExceeded: (ctx) => ctx.reply("⚠️ Slow down."),
+  onLimitExceeded: (ctx) =>
+    ctx.reply("⚠️ You're going a bit fast. Try again in a moment."),
 };
 
 bot.use(rateLimit(limitConfig));
 
 bot.use(async (ctx, next) => {
   if (ctx.from) {
-    await supabase
-      .from("users")
-      .upsert({ 
-        id: ctx.from.id,
-        last_active: new Date(), 
-      });
+    await supabase.from("users").upsert({
+      id: ctx.from.id,
+      last_active: new Date(),
+    });
   }
 
   return next();
@@ -43,30 +42,30 @@ bot.start(async (ctx) => {
   if (error) console.log(error);
 
   ctx.reply(
-    `👋 Welcome to Telepilot\n\n` +
-    `⚙️ If I don't reply, I may be offline or under maintenance.\n\n` +
-    `Type /help to see available commands`
+    `👋 Hey! Welcome to Telepilot.\n\n` +
+      `If I go quiet, I might be offline or in maintenance.\n\n` +
+      `Type /help to see what I can do.`,
   );
 });
 
 bot.help((ctx) =>
   ctx.reply(
     `🤖 Telepilot Commands\n\n` +
-      `/start - start the bot\n` +
-      `/help - list commands\n` +
-      `/status - check bot availability\n` +
-      `/about - bot info\n` +
-      `/quote - get a random quote`
+      `/start - get started\n` +
+      `/help - see commands list\n` +
+      `/status - check if I'm online\n` +
+      `/about - what this bot is\n` +
+      `/quote - grab a random quote`,
   ),
 );
 
-bot.command("status", (ctx) => ctx.reply("🟢 Telepilot is online and running"));
+bot.command("status", (ctx) => ctx.reply("🟢 All good here. I'm online."));
 
 bot.command("about", (ctx) =>
   ctx.reply(
     `🚀 Telepilot\n` +
-      `An automation-focused Telegram bot built with Node.js.\n\n` +
-      `More features coming soon.`,
+      `A Telegram automation bot built with Node.js.\n\n` +
+      `More features are on the way.`,
   ),
 );
 
@@ -75,26 +74,28 @@ bot.command("quote", async (ctx) => {
     const quote = await getRandomQuote();
     await ctx.reply(`💬 "${quote.q}"\n\n— ${quote.a}`);
   } catch (err) {
-    await ctx.reply("⚠️ Could not fetch quote. Try again later.");
+    await ctx.reply(
+      "⚠️ I couldn't fetch a quote just now. Please try again soon.",
+    );
   }
 });
 
 bot.command("broadcast", async (ctx) => {
   if (!isAdmin(ctx)) {
-    return ctx.reply("⛔ You are not authorized to use this command.");
+    return ctx.reply("⛔ Sorry, that command is admin-only.");
   }
 
   const message = ctx.message.text.replace("/broadcast", "").trim();
 
   if (!message) {
-    return ctx.reply("Usage: /broadcast your message here");
+    return ctx.reply("Usage: /broadcast <message>");
   }
 
   const { data: users, error } = await supabase.from("users").select("id");
 
   if (error) {
     console.log(error);
-    return ctx.reply("❌ Failed to fetch users.");
+    return ctx.reply("❌ I couldn't fetch the user list.");
   }
 
   let success = 0;
@@ -113,7 +114,7 @@ bot.command("broadcast", async (ctx) => {
 
 bot.command("stats", async (ctx) => {
   if (!isAdmin(ctx)) {
-    return ctx.reply("⛔ Not authorized.");
+    return ctx.reply("⛔ Sorry, that command is admin-only.");
   }
 
   const { count, error } = await supabase
@@ -121,20 +122,20 @@ bot.command("stats", async (ctx) => {
     .select("*", { count: "exact", head: true });
 
   if (error) {
-    return ctx.reply("❌ Failed to fetch stats.");
+    return ctx.reply("❌ I couldn't fetch stats right now.");
   }
 
   ctx.reply(`📊 Total users: ${count}`);
 });
 
 bot.command("active", async (ctx) => {
-  if (!isAdmin(ctx)) return ctx.reply("⛔ Not authorized.");
+  if (!isAdmin(ctx)) return ctx.reply("⛔ Sorry, that command is admin-only.");
 
   const now = new Date();
   const oneDayAgo = new Date(now - 24 * 60 * 60 * 1000).toISOString();
   const sevenDaysAgo = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString();
   const thirtyDaysAgo = new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString();
-  
+
   const { count: active24h } = await supabase
     .from("users")
     .select("*", { count: "exact", head: true })
@@ -151,15 +152,15 @@ bot.command("active", async (ctx) => {
     .gte("last_active", thirtyDaysAgo);
 
   ctx.reply(
-    `📈 Activity Stats\n\n` +
-      `🟢 Active (24h): ${active24h ?? 0}\n` +
-      `🟡 Active (7d): ${active7d ?? 0}\n` +
-      `🔵 Active (30d): ${active30d ?? 0}`,
+    `📈 Activity snapshot\n\n` +
+      `🟢 Active in last 24h: ${active24h ?? 0}\n` +
+      `🟡 Active in last 7d: ${active7d ?? 0}\n` +
+      `🔵 Active in last 30d: ${active30d ?? 0}`,
   );
 });
 
 bot.command("growth", async (ctx) => {
-  if (!isAdmin(ctx)) return ctx.reply("⛔ Not authorized.");
+  if (!isAdmin(ctx)) return ctx.reply("⛔ Sorry, that command is admin-only.");
 
   const now = new Date();
 
@@ -183,15 +184,15 @@ bot.command("growth", async (ctx) => {
     .gte("created_at", thirtyDaysAgo);
 
   ctx.reply(
-    `📊 Growth Stats\n\n` +
-      `🟢 New (24h): ${new24h ?? 0}\n` +
-      `🟡 New (7d): ${new7d ?? 0}\n` +
-      `🔵 New (30d): ${new30d ?? 0}`,
+    `📊 Growth snapshot\n\n` +
+      `🟢 New in last 24h: ${new24h ?? 0}\n` +
+      `🟡 New in last 7d: ${new7d ?? 0}\n` +
+      `🔵 New in last 30d: ${new30d ?? 0}`,
   );
 });
 
 bot.on("text", (ctx) => {
-  ctx.reply(`📩 Received!`);
+  ctx.reply("✅ Got it! If you need anything specific, try /help.");
 });
 
 bot.launch({ dropPendingUpdates: true });
