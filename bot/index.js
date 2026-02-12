@@ -195,6 +195,14 @@ bot.on("text", (ctx) => {
   ctx.reply("✅ Got it! If you need anything specific, try /help.");
 });
 
+bot.catch((err, ctx) => {
+  console.error("Bot error:", err);
+
+  if (ctx && ctx.reply) {
+    ctx.reply("⚠️ Something went wrong. Please try again later.");
+  }
+});
+
 bot.launch({ dropPendingUpdates: true });
 console.log("🟢 Telepilot running...");
 
@@ -203,3 +211,12 @@ const app = express();
 
 app.get("/", (req, res) => res.send("Telepilot running"));
 app.listen(process.env.PORT || 3000);
+
+
+process.on("unhandledRejection", (err) => {
+  console.error("Unhandled Rejection:", err);
+});
+
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception:", err);
+});
