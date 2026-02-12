@@ -14,6 +14,7 @@ Telepilot is a modular automation bot for Telegram. The codebase keeps bot logic
 
 - Telegram bot commands with Telegraf
 - User persistence to Supabase on `/start`
+- Activity tracking (`last_active`) for `/active` stats
 - Admin-only broadcast messaging
 - Random quote command backed by an external API
 - Express HTTP endpoint for basic uptime checks
@@ -34,6 +35,8 @@ Admin commands:
 
 - `/broadcast <message>` - send a broadcast
 - `/stats` - user count
+- `/active` - active users analytics
+- `/growth` - growth analytics
 
 ---
 
@@ -53,7 +56,7 @@ Admin commands:
 telepilot/
 ├── bot/
 │   └── index.js
-├── api/                # currently empty
+├── api/
 ├── services/
 │   └── quoteService.js
 ├── config/
@@ -95,11 +98,14 @@ PORT=3000
 
 ### 4. Prepare Supabase
 
-The bot writes to a `users` table on `/start` with columns:
+The bot writes to a `users` table on `/start` and updates activity on every message.
+Minimum columns needed for current features:
 
 - `id` (number)
 - `username` (text, nullable)
 - `first_name` (text, nullable)
+- `last_active` (timestamp)
+- `created_at` (timestamp, default now())
 
 ---
 

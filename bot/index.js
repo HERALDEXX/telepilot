@@ -46,11 +46,7 @@ bot.help((ctx) =>
       `/help - list commands\n` +
       `/status - check bot availability\n` +
       `/about - bot info\n` +
-      `/quote - get a random quote\n\n` +
-      `Admin only\n` +
-      `/broadcast <message> - send a broadcast\n` +
-      `/stats - user count\n` +
-      `/active - active users analytics`,
+      `/quote - get a random quote`
   ),
 );
 
@@ -152,8 +148,40 @@ bot.command("active", async (ctx) => {
   );
 });
 
+bot.command("growth", async (ctx) => {
+  if (!isAdmin(ctx)) return ctx.reply("⛔ Not authorized.");
+
+  const now = new Date();
+
+  const oneDayAgo = new Date(now - 24 * 60 * 60 * 1000).toISOString();
+  const sevenDaysAgo = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const thirtyDaysAgo = new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString();
+
+  const { count: new24h } = await supabase
+    .from("users")
+    .select("*", { count: "exact", head: true })
+    .gte("created_at", oneDayAgo);
+
+  const { count: new7d } = await supabase
+    .from("users")
+    .select("*", { count: "exact", head: true })
+    .gte("created_at", sevenDaysAgo);
+
+  const { count: new30d } = await supabase
+    .from("users")
+    .select("*", { count: "exact", head: true })
+    .gte("created_at", thirtyDaysAgo);
+
+  ctx.reply(
+    `📊 Growth Stats\n\n` +
+      `🟢 New (24h): ${new24h ?? 0}\n` +
+      `🟡 New (7d): ${new7d ?? 0}\n` +
+      `🔵 New (30d): ${new30d ?? 0}`,
+  );
+});
+
 bot.on("text", (ctx) => {
-  ctx.reply(`📩 Received: ${ctx.message.text}`);
+  ctx.reply(`📩 Received!`);
 });
 
 bot.launch({ dropPendingUpdates: true });

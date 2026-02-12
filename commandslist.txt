@@ -1,0 +1,11 @@
+/start - start the bot
+/help - list commands
+/status - check bot availability
+/about - bot info
+/quote - get a random quote
+
+Admin only
+/broadcast <message> - send a broadcast
+/stats - user count
+/active - active users analytics
+/growth - growth analytics
