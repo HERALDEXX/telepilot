@@ -109,6 +109,12 @@ bot.command("broadcast", async (ctx) => {
     }
   }
 
+  await supabase.from("logs").insert({
+    type: "broadcast",
+    user_id: ctx.from.id,
+    message: `${message} | sent to ${success} users`,
+  });
+
   ctx.reply(`📢 Broadcast sent to ${success} users.`);
 });
 
